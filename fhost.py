@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 
 """
@@ -409,8 +409,8 @@ retention = min_age + (-max_age + min_age) * pow((file_size / max_size - 1), 3)
 ABUSE
 -----
 
-If you would like to request permanent deletion, please contact lachs0r via
-IRC on Freenode, or send an email to lachs0r@(this domain).
+If you would like to request permanent deletion, please contact ben or khuxkm via
+IRC on tilde.chat, or send an email to sudoers@tilde.team.
 
 Please allow up to 24 hours for a response.
 
