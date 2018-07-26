@@ -369,8 +369,8 @@ def fhost():
         <body>
         <div class="container">
         
-THE NULL POINTER
-================
+<h1>THE NULL POINTER</h1>
+<hr>
 
 HTTP POST files here:
     <pre>curl -F'file=@yourfile.png' {0}</pre>
@@ -379,15 +379,15 @@ You can also POST remote URLs:
 Or you can shorten URLs:
     <pre>curl -F'shorten=http://example.com/some/long/url' {0}</pre>
 
-File URLs are valid for at least 30 days and up to a year (see below).
-Shortened URLs do not expire.
+<p>File URLs are valid for at least 30 days and up to a year (see below).
+Shortened URLs do not expire.</p>
 
-Maximum file size: {1}
-Not allowed: {5}
+<p>Maximum file size: {1}</p>
+<p>Not allowed: {5}</p>
 
 
-FILE RETENTION PERIOD
----------------------
+<h3>FILE RETENTION PERIOD</h3>
+
 <pre>
 retention = min_age + (-max_age + min_age) * pow((file_size / max_size - 1), 3)
 
@@ -414,13 +414,13 @@ retention = min_age + (-max_age + min_age) * pow((file_size / max_size - 1), 3)
            {4}
 </pre>
 
-ABUSE
------
+<h3>ABUSE</h3>
+<hr>
 
-If you would like to request permanent deletion, please contact ben or khuxkm via
-IRC on <a href="https://web.tilde.chat">tilde.chat</a>, or send an email to sudoers@tilde.team.
+<p>If you would like to request permanent deletion, please contact ben or khuxkm via
+IRC on <a href="https://web.tilde.chat">tilde.chat</a>, or send an email to sudoers@tilde.team.</p>
 
-Please allow up to 24 hours for a response.
+<p>Please allow up to 24 hours for a response.</p>
 
 </div>
 </body>
