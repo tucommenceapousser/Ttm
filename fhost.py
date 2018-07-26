@@ -360,16 +360,22 @@ def fhost():
         if maxsizehalf.is_integer():
             maxsizehalf = int(maxsizehalf)
 
-        return """<pre>
+        return """
+        <html>
+        <head>
+        </head>
+        <body>
+        <div class="container">
+        
 THE NULL POINTER
 ================
 
 HTTP POST files here:
-    curl -F'file=@yourfile.png' {0}
+    <pre>curl -F'file=@yourfile.png' {0}</pre>
 You can also POST remote URLs:
-    curl -F'url=http://example.com/image.jpg' {0}
+    <pre>curl -F'url=http://example.com/image.jpg' {0}</pre>
 Or you can shorten URLs:
-    curl -F'shorten=http://example.com/some/long/url' {0}
+    <pre>curl -F'shorten=http://example.com/some/long/url' {0}</pre>
 
 File URLs are valid for at least 30 days and up to a year (see below).
 Shortened URLs do not expire.
@@ -380,7 +386,7 @@ Not allowed: {5}
 
 FILE RETENTION PERIOD
 ---------------------
-
+<pre>
 retention = min_age + (-max_age + min_age) * pow((file_size / max_size - 1), 3)
 
    days
@@ -404,26 +410,19 @@ retention = min_age + (-max_age + min_age) * pow((file_size / max_size - 1), 3)
      30 |                                    ....................
           0{2}{3}
            {4}
-
+</pre>
 
 ABUSE
 -----
 
 If you would like to request permanent deletion, please contact ben or khuxkm via
-IRC on tilde.chat, or send an email to sudoers@tilde.team.
+IRC on <a href="https://web.tilde.chat">tilde.chat</a>, or send an email to sudoers@tilde.team.
 
 Please allow up to 24 hours for a response.
 
-
-UPLOAD DIRECTLY
----------------
-
-<form action="{0}" method="POST" enctype="multipart/form-data">
-    <label for="file">File:</label>
-    <input class="form-control" type="file" name="file"><br><br>
-    <input class="form-control" type="submit" value="Submit">
-</form>
-</pre>
+</div>
+</body>
+</html>
 """.format(fhost_url(),
            maxsize, str(maxsizehalf).rjust(27), str(maxsizenum).rjust(27),
            maxsizeunit.rjust(54),
