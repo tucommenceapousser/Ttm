@@ -413,6 +413,16 @@ If you would like to request permanent deletion, please contact lachs0r via
 IRC on Freenode, or send an email to lachs0r@(this domain).
 
 Please allow up to 24 hours for a response.
+
+
+UPLOAD DIRECTLY
+---------------
+
+<form action="{0}" method="POST" enctype="multipart/form-data">
+    <label for="file">File:</label>
+    <input class="form-control" type="file" name="file"><br><br>
+    <input class="form-control" type="submit" value="Submit">
+</form>
 </pre>
 """.format(fhost_url(),
            maxsize, str(maxsizehalf).rjust(27), str(maxsizenum).rjust(27),
