@@ -364,7 +364,7 @@ def fhost():
         <html>
         <head>
         	<link rel="stylesheet" href="https://tilde.team/css/hacker.css">
-            <title>{0}</title>
+            <title>{6}</title>
         </head>
         <body>
         <div class="container">
@@ -428,7 +428,7 @@ IRC on <a href="https://web.tilde.chat">tilde.chat</a>, or send an email to sudo
 """.format(fhost_url(),
            maxsize, str(maxsizehalf).rjust(27), str(maxsizenum).rjust(27),
            maxsizeunit.rjust(54),
-           ", ".join(app.config["FHOST_MIME_BLACKLIST"]))
+           ", ".join(app.config["FHOST_MIME_BLACKLIST"]),fhost_url().split("/",2)[2])
 
 @app.route("/robots.txt")
 def robots():
