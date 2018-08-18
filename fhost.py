@@ -364,7 +364,7 @@ def fhost():
         <html>
         <head>
         	<link rel="stylesheet" href="https://tilde.team/css/hacker.css">
-            <title>0x0.tilde.team</title>
+            <title>{0}</title>
         </head>
         <body>
         <div class="container">
