@@ -385,6 +385,7 @@ Shortened URLs do not expire.</p>
 <p>Maximum file size: {1}</p>
 <p>Not allowed: {5}</p>
 
+<em>if you want a nice wrapper, try <a href="https://tildegit.org/tomasino/pb">~tomasino's pb</a></em>
 
 <h3>FILE RETENTION PERIOD</h3>
 
@@ -421,6 +422,17 @@ retention = min_age + (-max_age + min_age) * pow((file_size / max_size - 1), 3)
 IRC on <a href="https://web.tilde.chat">tilde.chat</a>, or send an email to sudoers@tilde.team.</p>
 
 <p>Please allow up to 24 hours for a response.</p>
+
+<h3>UPLOAD DIRECTLY</h3>
+<hr>
+
+<form action="{0}" method="POST" enctype="multipart/form-data">
+    <label for="file">File:</label>
+    <input class="form-control" type="file" name="file"><br><br>
+    <input class="form-control" type="submit" value="Submit">
+</form>
+
+<footer class="text-center"><a href="https://tildegit.org/tildeverse/0x0">source here</a></footer>
 
 </div>
 </body>
