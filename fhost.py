@@ -254,6 +254,12 @@ def store_file(f, addr):
 def store_url(url, addr):
     if is_fhost_url(url):
         return segfault(508)
+      
+   	# handler to convert gopher links to HTTP(S) proxy
+    gopher = "gopher://"
+    if url[:len(gopher)] = gopher:
+        address = url.split(gopher, 1)[1]
+        url = "https://gopher.tilde.team/{}".format(address)
 
     h = { "Accept-Encoding" : "identity" }
     r = requests.get(url, stream=True, verify=False, headers=h)
