@@ -255,7 +255,7 @@ def store_url(url, addr):
     if is_fhost_url(url):
         return segfault(508)
       
-   	# handler to convert gopher links to HTTP(S) proxy
+    # handler to convert gopher links to HTTP(S) proxy
     gopher = "gopher://"
     if url[:len(gopher)] = gopher:
         address = url.split(gopher, 1)[1]
