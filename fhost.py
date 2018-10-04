@@ -151,14 +151,14 @@ def is_fhost_url(url):
     return url.startswith(fhost_url()) or url.startswith(fhost_url("https"))
 
 def shorten(url):
-    if len(url) > app.config["MAX_URL_LENGTH"]:
-        abort(414)
-
     # handler to convert gopher links to HTTP(S) proxy
     gopher = "gopher://"
     length = len(gopher)
     if url[:length] == gopher:
         url = "https://gopher.tilde.team/{}".format(url[length:])
+
+    if len(url) > app.config["MAX_URL_LENGTH"]:
+        abort(414)
 
     if not url_valid(url) or is_fhost_url(url) or "\n" in url:
         abort(400)
