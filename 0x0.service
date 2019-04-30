@@ -1,0 +1,18 @@
+# /etc/systemd/system/nullpointer.service
+[Unit]
+Description=null pointer
+After=0x0.service
+
+[Service]
+Type=simple
+WorkingDirectory=/home/services/0x0
+ExecStart=/usr/local/bin/uwsgi --socket 127.0.0.1:3031 --wsgi-file fhost.py --callable app --processes 4 --threads 2
+User=services
+Restart=always
+RestartSec=5
+StartLimitInterval=60s
+StartLimitBurst=3
+
+[Install]
+WantedBy=default.target
+
