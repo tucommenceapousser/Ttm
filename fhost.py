@@ -53,6 +53,7 @@ app.config["FHOST_EXT_OVERRIDE"] = {
     "application/octet-stream" : ".bin",
     "text/plain" : ".log",
     "text/plain" : ".txt",
+    "text/html": ".txt",
     "text/x-diff" : ".diff",
 }
 
@@ -437,7 +438,8 @@ retention = min_age + (-max_age + min_age) * pow((file_size / max_size - 1), 3)
 <hr>
 
 <p>If you would like to request permanent deletion, please contact ben or khuxkm via
-IRC on <a href="https://web.tilde.chat">tilde.chat</a>, or send an email to sudoers@tilde.team.</p>
+IRC on <a href="https://web.tilde.chat">tilde.chat</a>, or send an email to sudoers@tilde.team
+with the id of the file to be deleted.</p>
 
 <p>Please allow up to 24 hours for a response.</p>
 
