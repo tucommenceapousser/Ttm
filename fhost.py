@@ -438,7 +438,7 @@ retention = min_age + (-max_age + min_age) * pow((file_size / max_size - 1), 3)
 <hr>
 
 <p>If you would like to request permanent deletion, please contact ben or khuxkm via
-IRC on <a href="https://web.tilde.chat">tilde.chat</a>, or send an email to sudoers@tilde.team
+IRC on <a href="https://tilde.chat">tilde.chat</a>, or send an email to sudoers@tilde.team
 with the id of the file to be deleted.</p>
 
 <p>Please allow up to 24 hours for a response.</p>
@@ -452,7 +452,7 @@ with the id of the file to be deleted.</p>
     <input class="form-control" type="submit" value="Submit">
 </form>
 
-<footer class="text-center"><a href="https://tildegit.org/tildeverse/0x0">source here</a></footer>
+<footer class="text-center"><a href="https://tildegit.org/tildeverse/ttm.sh">source here</a></footer>
 
 </div>
 </body>
