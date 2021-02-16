@@ -19,7 +19,17 @@
     and limitations under the License.
 """
 
-from flask import Flask, abort, escape, make_response, redirect, request, send_from_directory, url_for, Response
+from flask import (
+    Flask,
+    abort,
+    escape,
+    make_response,
+    redirect,
+    request,
+    send_from_directory,
+    url_for,
+    Response,
+)
 from flask_sqlalchemy import SQLAlchemy
 from flask_script import Manager
 from flask_migrate import Migrate, MigrateCommand
@@ -35,33 +45,34 @@ from validators import url as url_valid
 app = Flask(__name__)
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///db.sqlite" # "postgresql://0x0@/0x0"
-app.config["PREFERRED_URL_SCHEME"] = "https" # nginx users: make sure to have 'uwsgi_param UWSGI_SCHEME $scheme;' in your config
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///db.sqlite"  # "postgresql://0x0@/0x0"
+# nginx users: make sure to have 'uwsgi_param UWSGI_SCHEME $scheme;' in your config
+app.config["PREFERRED_URL_SCHEME"] = "https"
 app.config["MAX_CONTENT_LENGTH"] = 256 * 1024 * 1024
 app.config["MAX_URL_LENGTH"] = 4096
 app.config["FHOST_STORAGE_PATH"] = "up"
-app.config["FHOST_USE_X_ACCEL_REDIRECT"] = True # expect nginx by default
+app.config["FHOST_USE_X_ACCEL_REDIRECT"] = True  # expect nginx by default
 app.config["USE_X_SENDFILE"] = False
 app.config["FHOST_EXT_OVERRIDE"] = {
-    "audio/flac" : ".flac",
-    "image/gif" : ".gif",
-    "image/jpeg" : ".jpg",
-    "image/png" : ".png",
-    "image/svg+xml" : ".svg",
-    "video/webm" : ".webm",
-    "video/x-matroska" : ".mkv",
-    "application/octet-stream" : ".bin",
-    "text/plain" : ".log",
-    "text/plain" : ".txt",
+    "audio/flac": ".flac",
+    "image/gif": ".gif",
+    "image/jpeg": ".jpg",
+    "image/png": ".png",
+    "image/svg+xml": ".svg",
+    "video/webm": ".webm",
+    "video/x-matroska": ".mkv",
+    "application/octet-stream": ".bin",
+    "text/plain": ".log",
+    "text/plain": ".txt",
     "text/html": ".txt",
-    "text/x-diff" : ".diff",
+    "text/x-diff": ".diff",
 }
 
 # default blacklist to avoid AV mafia extortion
 app.config["FHOST_MIME_BLACKLIST"] = [
     "application/x-dosexec",
     "application/java-archive",
-    "application/java-vm"
+    "application/java-vm",
 ]
 
 app.config["FHOST_UPLOAD_BLACKLIST"] = "tornodes.txt"
@@ -71,13 +82,21 @@ app.config["NSFW_THRESHOLD"] = 0.608
 
 if app.config["NSFW_DETECT"]:
     from nsfw_detect import NSFWDetector
+
     nsfw = NSFWDetector()
+
+app.config["STRIP_IMAGE_EXIF"] = True
+
+if app.config["STRIP_IMAGE_EXIF"]:
+    import subprocess
 
 try:
     mimedetect = Magic(mime=True, mime_encoding=False)
 except:
-    print("""Error: You have installed the wrong version of the 'magic' module.
-Please install python-magic.""")
+    print(
+        """Error: You have installed the wrong version of the 'magic' module.
+Please install python-magic."""
+    )
     sys.exit(1)
 
 if not os.path.exists(app.config["FHOST_STORAGE_PATH"]):
@@ -89,11 +108,15 @@ migrate = Migrate(app, db)
 manager = Manager(app)
 manager.add_command("db", MigrateCommand)
 
-su = UrlEncoder(alphabet='DEQhd2uFteibPwq0SWBInTpA_jcZL5GKz3YCR14Ulk87Jors9vNHgfaOmMXy6Vx-', block_size=16)
+su = UrlEncoder(
+    alphabet="DEQhd2uFteibPwq0SWBInTpA_jcZL5GKz3YCR14Ulk87Jors9vNHgfaOmMXy6Vx-",
+    block_size=16,
+)
+
 
 class URL(db.Model):
-    id = db.Column(db.Integer, primary_key = True)
-    url = db.Column(db.UnicodeText, unique = True)
+    id = db.Column(db.Integer, primary_key=True)
+    url = db.Column(db.UnicodeText, unique=True)
 
     def __init__(self, url):
         self.url = url
@@ -104,9 +127,10 @@ class URL(db.Model):
     def geturl(self):
         return url_for("get", path=self.getname(), _external=True) + "\n"
 
+
 class File(db.Model):
-    id = db.Column(db.Integer, primary_key = True)
-    sha256 = db.Column(db.String, unique = True)
+    id = db.Column(db.Integer, primary_key=True)
+    sha256 = db.Column(db.String, unique=True)
     ext = db.Column(db.UnicodeText)
     mime = db.Column(db.UnicodeText)
     addr = db.Column(db.UnicodeText)
@@ -139,8 +163,10 @@ class File(db.Model):
             if not v.startswith("_sa"):
                 print("{}: {}".format(v, vals[v]))
 
+
 def getpath(fn):
     return os.path.join(app.config["FHOST_STORAGE_PATH"], fn)
+
 
 def fhost_url(scheme=None):
     if not scheme:
@@ -148,8 +174,10 @@ def fhost_url(scheme=None):
     else:
         return url_for(".fhost", _external=True, _scheme=scheme).rstrip("/")
 
+
 def is_fhost_url(url):
     return url.startswith(fhost_url()) or url.startswith(fhost_url("https"))
+
 
 def shorten(url):
     # handler to convert gopher links to HTTP(S) proxy
@@ -175,6 +203,7 @@ def shorten(url):
 
         return u.geturl()
 
+
 def in_upload_bl(addr):
     if os.path.isfile(app.config["FHOST_UPLOAD_BLACKLIST"]):
         with open(app.config["FHOST_UPLOAD_BLACKLIST"], "r") as bl:
@@ -186,12 +215,8 @@ def in_upload_bl(addr):
 
     return False
 
-def store_file(f, addr):
-    if in_upload_bl(addr):
-        return "Your host is blocked from uploading files.\n", 451
 
-    data = f.stream.read()
-    digest = sha256(data).hexdigest()
+def check_existing(digest, data, addr):
     existing = File.query.filter_by(sha256=digest).first()
 
     if existing:
@@ -213,50 +238,94 @@ def store_file(f, addr):
         db.session.commit()
 
         return existing.geturl()
+    return None
+
+
+def store_file(f, addr):
+    if in_upload_bl(addr):
+        return "Your host is blocked from uploading files.\n", 451
+
+    data = f.stream.read()
+    digest = sha256(data).hexdigest()
+
+    exists = check_existing(digest, data, addr)
+    if exists != None:
+        return exists
+
+    guessmime = mimedetect.from_buffer(data)
+
+    if (
+        not f.content_type
+        or not "/" in f.content_type
+        or f.content_type == "application/octet-stream"
+    ):
+        mime = guessmime
     else:
-        guessmime = mimedetect.from_buffer(data)
+        mime = f.content_type
 
-        if not f.content_type or not "/" in f.content_type or f.content_type == "application/octet-stream":
-            mime = guessmime
+    if (
+        mime in app.config["FHOST_MIME_BLACKLIST"]
+        or guessmime in app.config["FHOST_MIME_BLACKLIST"]
+    ):
+        abort(415)
+
+    if mime.startswith("text/") and not "charset" in mime:
+        mime += "; charset=utf-8"
+
+    ext = os.path.splitext(f.filename)[1]
+
+    if not ext:
+        gmime = mime.split(";")[0]
+
+        if not gmime in app.config["FHOST_EXT_OVERRIDE"]:
+            ext = guess_extension(gmime)
         else:
-            mime = f.content_type
+            ext = app.config["FHOST_EXT_OVERRIDE"][gmime]
+    else:
+        ext = ext[:8]
 
-        if mime in app.config["FHOST_MIME_BLACKLIST"] or guessmime in app.config["FHOST_MIME_BLACKLIST"]:
-            abort(415)
+    if not ext:
+        ext = ".bin"
 
-        if mime.startswith("text/") and not "charset" in mime:
-            mime += "; charset=utf-8"
+    if app.config["STRIP_IMAGE_EXIF"] and mime.startswith("image/"):
+        p = subprocess.Popen(
+            [
+                "exiftool",
+                "-stay_open",
+                "true",
+                "-all=",
+                "-tagsfromfile",
+                "@",
+                "-Orientation",
+                "-",
+            ],
+            stdout=subprocess.PIPE,
+            stdin=subprocess.PIPE,
+        )
+        p.stdin.write(data)
+        p.stdin.close()
+        data = p.stdout.read()
+        digest = sha256(data).hexdigest()
+        exists = check_existing(digest, data, addr)
+        if exists != None:
+            return exists
 
-        ext = os.path.splitext(f.filename)[1]
+    spath = getpath(digest)
 
-        if not ext:
-            gmime = mime.split(";")[0]
+    with open(spath, "wb") as of:
+        of.write(data)
 
-            if not gmime in app.config["FHOST_EXT_OVERRIDE"]:
-                ext = guess_extension(gmime)
-            else:
-                ext = app.config["FHOST_EXT_OVERRIDE"][gmime]
-        else:
-            ext = ext[:8]
+    if app.config["NSFW_DETECT"]:
+        nsfw_score = nsfw.detect(spath)
+    else:
+        nsfw_score = None
 
-        if not ext:
-            ext = ".bin"
+    sf = File(digest, ext, mime, addr, nsfw_score)
+    db.session.add(sf)
+    db.session.commit()
 
-        spath = getpath(digest)
+    return sf.geturl()
 
-        with open(spath, "wb") as of:
-            of.write(data)
-
-        if app.config["NSFW_DETECT"]:
-            nsfw_score = nsfw.detect(spath)
-        else:
-            nsfw_score = None
-
-        sf = File(digest, ext, mime, addr, nsfw_score)
-        db.session.add(sf)
-        db.session.commit()
-
-        return sf.geturl()
 
 def store_url(url, addr):
     # handler to convert gopher links to HTTP(S) proxy
@@ -268,7 +337,7 @@ def store_url(url, addr):
     if is_fhost_url(url):
         return segfault(508)
 
-    h = { "Accept-Encoding" : "identity" }
+    h = {"Accept-Encoding": "identity"}
     r = requests.get(url, stream=True, verify=False, headers=h)
 
     try:
@@ -280,19 +349,26 @@ def store_url(url, addr):
         l = int(r.headers["content-length"])
 
         if l < app.config["MAX_CONTENT_LENGTH"]:
-            def urlfile(**kwargs):
-                return type('',(),kwargs)()
 
-            f = urlfile(stream=r.raw, content_type=r.headers["content-type"], filename="")
+            def urlfile(**kwargs):
+                return type("", (), kwargs)()
+
+            f = urlfile(
+                stream=r.raw, content_type=r.headers["content-type"], filename=""
+            )
 
             return store_file(f, addr)
         else:
-            hl = naturalsize(l, binary = True)
+            hl = naturalsize(l, binary=True)
             hml = naturalsize(app.config["MAX_CONTENT_LENGTH"], binary=True)
 
             return "Remote file too large ({0} > {1}).\n".format(hl, hml), 413
     else:
-        return "Could not determine remote file size (no Content-Length in response header; shoot admin).\n", 411
+        return (
+            "Could not determine remote file size (no Content-Length in response header; shoot admin).\n",
+            411,
+        )
+
 
 @app.route("/<path:path>")
 def get(path):
@@ -320,7 +396,9 @@ def get(path):
                 response.headers["X-Accel-Redirect"] = "/" + fpath
                 return response
             else:
-                return send_from_directory(app.config["FHOST_STORAGE_PATH"], f.sha256, mimetype = f.mime)
+                return send_from_directory(
+                    app.config["FHOST_STORAGE_PATH"], f.sha256, mimetype=f.mime
+                )
     else:
         u = URL.query.get(id)
 
@@ -329,9 +407,10 @@ def get(path):
 
     abort(404)
 
-#@app.route("/dump_urls/")
-#@app.route("/dump_urls/<int:start>")
-#def dump_urls(start=0):
+
+# @app.route("/dump_urls/")
+# @app.route("/dump_urls/<int:start>")
+# def dump_urls(start=0):
 #    meta = "#FORMAT: BEACON\n#PREFIX: {}/\n\n".format(fhost_url("https"))
 #
 #    def gen():
@@ -346,6 +425,7 @@ def get(path):
 #            yield url.getname() + bar + url.url + "\n"
 #
 #    return Response(gen(), mimetype="text/plain")
+
 
 @app.route("/", methods=["GET", "POST"])
 def fhost():
@@ -457,10 +537,16 @@ with the id of the file to be deleted.</p>
 </div>
 </body>
 </html>
-""".format(fhost_url(),
-           maxsize, str(maxsizehalf).rjust(27), str(maxsizenum).rjust(27),
-           maxsizeunit.rjust(54),
-           ", ".join(app.config["FHOST_MIME_BLACKLIST"]),fhost_url().split("/",2)[2])
+""".format(
+            fhost_url(),
+            maxsize,
+            str(maxsizehalf).rjust(27),
+            str(maxsizenum).rjust(27),
+            maxsizeunit.rjust(54),
+            ", ".join(app.config["FHOST_MIME_BLACKLIST"]),
+            fhost_url().split("/", 2)[2],
+        )
+
 
 @app.route("/robots.txt")
 def robots():
@@ -468,8 +554,10 @@ def robots():
 Disallow: /
 """
 
+
 def legal():
     return "451 Unavailable For Legal Reasons\n", 451
+
 
 @app.errorhandler(400)
 @app.errorhandler(404)
@@ -478,9 +566,11 @@ def legal():
 def segfault(e):
     return "Segmentation fault\n", e.code
 
+
 @app.errorhandler(404)
 def notfound(e):
-    return u"""<pre>Process {0} stopped
+    return (
+        u"""<pre>Process {0} stopped
 * thread #1: tid = {0}, {1:#018x}, name = '{2}'
     frame #0:
 Process {0} stopped
@@ -494,12 +584,18 @@ Process {0} stopped
    141               ctx->serve_file_id(obj->id);
    142               break;
 (lldb) q</pre>
-""".format(os.getpid(), id(app), "fhost", id(get), escape(request.path)), e.code
+""".format(
+            os.getpid(), id(app), "fhost", id(get), escape(request.path)
+        ),
+        e.code,
+    )
+
 
 @manager.command
 def debug():
     app.config["FHOST_USE_X_ACCEL_REDIRECT"] = False
-    app.run(debug=True, port=4562,host="0.0.0.0")
+    app.run(debug=True, port=4562, host="0.0.0.0")
+
 
 @manager.command
 def permadelete(name):
@@ -512,6 +608,7 @@ def permadelete(name):
         f.removed = True
         db.session.commit()
 
+
 @manager.command
 def query(name):
     id = su.debase(name)
@@ -520,12 +617,14 @@ def query(name):
     if f:
         f.pprint()
 
+
 @manager.command
 def queryhash(h):
     f = File.query.filter_by(sha256=h).first()
 
     if f:
         f.pprint()
+
 
 @manager.command
 def queryaddr(a, nsfw=False, removed=False):
@@ -540,6 +639,7 @@ def queryaddr(a, nsfw=False, removed=False):
     for f in res:
         f.pprint()
 
+
 @manager.command
 def deladdr(a):
     res = File.query.filter_by(addr=a).filter(File.removed != True)
@@ -551,13 +651,15 @@ def deladdr(a):
 
     db.session.commit()
 
+
 def nsfw_detect(f):
     try:
-        open(f["path"], 'r').close()
+        open(f["path"], "r").close()
         f["nsfw_score"] = nsfw.detect(f["path"])
         return f
     except:
         return None
+
 
 @manager.command
 def update_nsfw():
@@ -572,11 +674,11 @@ def update_nsfw():
 
     with Pool() as p:
         results = []
-        work = [{ "path" : getpath(f.sha256), "id" : f.id} for f in res]
+        work = [{"path": getpath(f.sha256), "id": f.id} for f in res]
 
         for r in tqdm.tqdm(p.imap_unordered(nsfw_detect, work), total=len(work)):
             if r:
-                results.append({"id": r["id"], "nsfw_score" : r["nsfw_score"]})
+                results.append({"id": r["id"], "nsfw_score": r["nsfw_score"]})
 
         db.session.bulk_update_mappings(File, results)
         db.session.commit()
@@ -604,6 +706,7 @@ def querybl(nsfw=False, removed=False):
 
     for f in res:
         f.pprint()
+
 
 if __name__ == "__main__":
     manager.run()
