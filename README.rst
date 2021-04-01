@@ -7,11 +7,11 @@ This is a no-bullshit file hosting and URL shortening service that also runs
 If you are running nginx, you should use the ``X-Accel-Redirect`` header.
 To make it work, include this in your nginx config’s ``server`` block::
 
-    location /up {
+    location /up/ {
         internal;
     }
 
-where ``/up`` is whatever you’ve configured as ``FHOST_STORAGE_PATH``
+where ``/up/`` is whatever you’ve configured as ``FHOST_STORAGE_PATH``
 in ``fhost.py``.
 
 For all other servers, set ``FHOST_USE_X_ACCEL_REDIRECT`` to ``False`` and
