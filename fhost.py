@@ -639,6 +639,28 @@ def queryaddr(a, nsfw=False, removed=False):
     for f in res:
         f.pprint()
 
+@manager.command
+def queryurl(u):
+    i = su.debase(u)
+    url = URL.query.get(i)
+    if url:
+        print("found url for shortname", u, "with id", i)
+        print(url.url)
+    else:
+        print("no shortened URL found for shortname", u)
+
+@manager.command
+def delurl(u):
+    i = su.debase(u)
+    url = URL.query.get(i)
+    if url:
+        print("deleting url for shortname", u)
+        print(url.url)
+        db.session.delete(url)
+        db.session.commit()
+    else:
+        print("no shortened URL found for shortname", u)
+
 
 @manager.command
 def deladdr(a):
