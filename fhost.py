@@ -44,7 +44,7 @@ app = Flask(__name__, instance_relative_config=True)
 app.config.update(
     SQLALCHEMY_TRACK_MODIFICATIONS = False,
     PREFERRED_URL_SCHEME = "https", # nginx users: make sure to have 'uwsgi_param UWSGI_SCHEME $scheme;' in your config
-    MAX_CONTENT_LENGTH = 256 * 1024 * 1024,
+    MAX_CONTENT_LENGTH = 64 * 1024 * 1024,
     MAX_URL_LENGTH = 4096,
     USE_X_SENDFILE = False,
     FHOST_USE_X_ACCEL_REDIRECT = True, # expect nginx by default
@@ -69,7 +69,7 @@ app.config.update(
         "application/java-archive",
         "application/java-vm"
     ],
-    FHOST_UPLOAD_BLACKLIST = None,
+    FHOST_UPLOAD_BLACKLIST = "blocklist.txt",
     NSFW_DETECT = False,
     NSFW_THRESHOLD = 0.608,
     VSCAN_SOCKET = None,
@@ -80,6 +80,7 @@ app.config.update(
     ],
     VSCAN_INTERVAL = datetime.timedelta(days=7),
     URL_ALPHABET = "DEQhd2uFteibPwq0SWBInTpA_jcZL5GKz3YCR14Ulk87Jors9vNHgfaOmMXy6Vx-",
+    STRIP_IMAGE_EXIF = True,
 )
 
 if not app.config["TESTING"]:
