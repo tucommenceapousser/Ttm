@@ -1,0 +1,82 @@
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#99f2b9">
+    <link rel="stylesheet" href="https://tilde.team/css/hacker.css">
+    <title>ttm.sh</title>
+</head>
+<body>
+<div class="container">
+
+<h1>THE NULL POINTER</h1>
+<hr>
+
+{% set fhost_url = url_for("fhost", _external=True).rstrip("/") %}
+
+<h2>USAGE</h2>
+<p>HTTP POST files here:</p>
+<pre>curl -F'file=@yourfile.png' {{ fhost_url }}</pre>
+<p>You can also POST remote URLs:</p>
+<pre>curl -F'url=http://example.com/image.jpg' {{ fhost_url }}</pre>
+
+<p><em>if you want a nice wrapper, try <a href="https://tildegit.org/tomasino/pb">~tomasino's pb</a></em></p>
+<p>here's our <a href="https://ttm.sh/sharex.json">sharex config</a></p>
+
+<h2>RETENTION AND GUIDELINES</h2>
+<p>File URLs are valid for at least 30 days and up to a year (see below).
+Shortened URLs do not expire.</p>
+{% set max_size = config["MAX_CONTENT_LENGTH"] | filesizeformat(True) %}
+<p>Maximum file size: <strong>{{ max_size }}</strong></p>
+<p>Not allowed: <em>{{ config["FHOST_MIME_BLACKLIST"] | join(", ") }}</em></p>
+
+<pre>
+retention = min_age + (-max_age + min_age) * pow((file_size / max_size - 1), 3)
+
+   days
+    365 |  \\
+        |   \\
+        |    \\
+        |     \\
+        |      \\
+        |       \\
+        |        ..
+        |          \\
+  197.5 | ----------..-------------------------------------------
+        |             ..
+        |               \\
+        |                ..
+        |                  ...
+        |                     ..
+        |                       ...
+        |                          ....
+        |                              ......
+     30 |                                    ....................
+          0{{ ((config["MAX_CONTENT_LENGTH"] / 2) | filesizeformat(True)).split(" ")[0].rjust(27) }}{{ max_size.split(" ")[0].rjust(27) }}
+           {{ max_size.split(" ")[1].rjust(54) }}
+</pre>
+
+<h2>CONTACT</h2>
+
+<p>
+    If you would like to request permanent deletion, please contact <code>ben</code> or 
+    <code>khuxkm</code> on <a href="https://tilde.chat">tilde.chat</a> IRC, or send an
+    email to sudoers@tilde.team with the id of the file to be deleted.
+</p>
+
+<p>Please allow up to 24 hours for a response.</p>
+
+<h2>UPLOAD DIRECTLY</h2>
+
+<form action="{{ fhost_url }}" method="POST" enctype="multipart/form-data">
+    <label for="file">File:</label>
+    <input class="form-control" type="file" name="file"><br><br>
+    <input class="form-control" type="submit" value="Submit">
+</form>
+
+<footer class="text-center"><a href="https://tildegit.org/tildeverse/ttm.sh">source here</a></footer>
+
+</div>
+</body>
+</html>
