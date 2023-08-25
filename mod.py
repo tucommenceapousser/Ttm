@@ -5,7 +5,7 @@ from sys import stdout
 import time
 
 from textual.app import App, ComposeResult
-from textual.widgets import DataTable, Header, Footer, TextLog, Static, Input
+from textual.widgets import DataTable, Header, Footer, Log, Static, Input
 from textual.containers import Horizontal, Vertical
 from textual.screen import Screen
 from textual import log
@@ -126,7 +126,7 @@ class NullptrMod(Screen):
             Vertical(
                 DataTable(id="finfo", show_header=False),
                 MpvWidget(id="mpv"),
-                TextLog(id="ftextlog"),
+                Log(id="ftextlog"),
             id="infopane"))
         yield Horizontal(Static("Filter:", id="filter_label"), Input(id="filter_input"), id="filter_container")
         yield Footer()
