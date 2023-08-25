@@ -698,3 +698,129 @@ Please set VSCAN_SOCKET.""")
 
         db.session.bulk_update_mappings(File, results)
         db.session.commit()
+
+@app.cli.command("permadelete")
+@click.argument("name")
+def permadelete(name):
+    f = File.query.get(su.debase(name))
+
+    if f:
+        fpath = f.getpath()
+
+        if fpath.is_file():
+            fpath.unlink()
+
+        f.removed = True
+        db.session.commit()
+
+
+@app.cli.command("query")
+@click.argument("name")
+def query(name):
+    f = File.query.get(su.debase(name))
+    if f:
+        print(f)
+
+
+@app.cli.command("queryhash")
+@click.argument("hash")
+def queryhash(hash):
+    f = File.query.filter_by(sha256=hash).first()
+    if f:
+        print(f)
+
+
+@app.cli.command("queryaddr")
+@click.argument("address")
+@click.option("--nsfw", is_flag=True, default=False)
+@click.option("--removed", is_flag=True, default=False)
+def queryaddr(address, nsfw, removed):
+    res = File.query.filter_by(addr=address)
+
+    if not removed:
+        res = res.filter(File.removed != True)
+
+    if nsfw:
+        res = res.filter(File.nsfw_score > app.config["NSFW_THRESHOLD"])
+
+    for f in res:
+        print(f)
+
+@app.cli.command("queryurl")
+@click.argument("url")
+def queryurl(url):
+    u = URL.query.get(su.debase(url))
+    if u:
+        print(u)
+
+@app.cli.command("delurl")
+@click.argument("url")
+def delurl(url):
+    u = URL.query.get(su.debase(url))
+    if u:
+        print("deleting url", u)
+        db.session.delete(u)
+        db.session.commit()
+
+@app.cli.command("deladdr")
+@click.argument("address")
+def deladdr(address):
+    res = File.query.filter_by(addr=address).filter(File.removed != True)
+
+    for f in res:
+        fpath = f.getpath()
+
+        if fpath.is_file():
+            fpath.unlink()
+
+        f.removed = True
+
+    db.session.commit()
+
+@app.cli.command("update_nsfw")
+def update_nsfw():
+    if not app.config["NSFW_DETECT"]:
+        print("NSFW detection is disabled in app config")
+        return 1
+
+    from multiprocessing import Pool
+    import tqdm
+
+    res = File.query.filter_by(nsfw_score=None, removed=False)
+
+    with Pool() as p:
+        results = []
+        work = [{"path": f.getpath(), "id": f.id} for f in res]
+
+        for r in tqdm.tqdm(p.imap_unordered(nsfw_detect, work), total=len(work)):
+            if r:
+                results.append({"id": r["id"], "nsfw_score": r["nsfw_score"]})
+
+        db.session.bulk_update_mappings(File, results)
+        db.session.commit()
+
+
+@app.cli.command("querybl")
+@click.option("--nsfw", is_flag=True, default=False)
+@click.option("--removed", is_flag=True, default=False)
+def querybl(nsfw, removed):
+    blist = []
+    if os.path.isfile(app.config["FHOST_UPLOAD_BLACKLIST"]):
+        with open(app.config["FHOST_UPLOAD_BLACKLIST"], "r") as bl:
+            for l in bl.readlines():
+                if not l.startswith("#"):
+                    if not ":" in l:
+                        blist.append("::ffff:" + l.rstrip())
+                    else:
+                        blist.append(l.strip())
+
+    res = File.query.filter(File.addr.in_(blist))
+
+    if not removed:
+        res = res.filter(File.removed != True)
+
+    if nsfw:
+        res = res.filter(File.nsfw_score > app.config["NSFW_THRESHOLD"])
+
+    for f in res:
+        print(f)
