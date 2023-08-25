@@ -558,6 +558,10 @@ def robots():
 Disallow: /
 """
 
+@app.route("/favicon.ico")
+def favicon():
+    return send_file("favicon.ico")
+
 @app.errorhandler(400)
 @app.errorhandler(401)
 @app.errorhandler(404)
