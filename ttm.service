@@ -1,0 +1,17 @@
+# /etc/systemd/system/ttm.service
+[Unit]
+Description=null pointer
+After=ttm.service
+
+[Service]
+Type=simple
+WorkingDirectory=/srv/ttm/ttm.sh
+ExecStart=/usr/local/bin/uwsgi --socket 127.0.0.1:3031 --wsgi-file fhost.py --callable app --processes 4 --threads 2
+User=ttm
+Restart=always
+RestartSec=5
+StartLimitInterval=60s
+StartLimitBurst=3
+
+[Install]
+WantedBy=default.target

@@ -18,6 +18,7 @@
     See the License for the specific language governing permissions
     and limitations under the License.
 """
+import subprocess
 
 from flask import Flask, abort, make_response, redirect, request, send_from_directory, url_for, Response, render_template
 from flask_sqlalchemy import SQLAlchemy
@@ -279,6 +280,32 @@ class File(db.Model):
         else:
             mime = get_mime()
             ext = get_ext(mime)
+
+            # strip all exif tags, saving orientation
+            # requires exiftool available on PATH
+            if app.config["STRIP_IMAGE_EXIF"] and mime.startswith("image/"):
+                p = subprocess.Popen(
+                    [
+                        "exiftool",
+                        "-stay_open",
+                        "true",
+                        "-all=",
+                        "-tagsfromfile",
+                        "@",
+                        "-Orientation",
+                        "-",
+                    ],
+                    stdout=subprocess.PIPE,
+                    stdin=subprocess.PIPE,
+                )
+                p.stdin.write(data)
+                p.stdin.close()
+                data = p.stdout.read()
+                digest = sha256(data).hexdigest()
+                f = File.query.filter_by(sha256=digest).first()
+                if f:
+                    return f
+
             mgmt_token = secrets.token_urlsafe()
             f = File(digest, ext, mime, addr, ua, expiration, mgmt_token)
 
@@ -294,7 +321,9 @@ class File(db.Model):
         storage.mkdir(parents=True, exist_ok=True)
         p = storage / digest
 
-        if not p.is_file():
+        if p.is_file():
+            p.touch()
+        else:
             with open(p, "wb") as of:
                 of.write(data)
 
@@ -340,23 +369,12 @@ def fhost_url(scheme=None):
 def is_fhost_url(url):
     return url.startswith(fhost_url()) or url.startswith(fhost_url("https"))
 
-def shorten(url):
-    if len(url) > app.config["MAX_URL_LENGTH"]:
-        abort(414)
-
-    if not url_valid(url) or is_fhost_url(url) or "\n" in url:
-        abort(400)
-
-    u = URL.get(url)
-
-    return u.geturl()
-
 def in_upload_bl(addr):
     if app.config["FHOST_UPLOAD_BLACKLIST"]:
         with app.open_instance_resource(app.config["FHOST_UPLOAD_BLACKLIST"], "r") as bl:
             check = addr.lstrip("::ffff:")
             for l in bl.readlines():
-                if not l.startswith("#"):
+                if not l.startswith(b"#"):
                     if check == l.rstrip():
                         return True
 
@@ -497,7 +515,7 @@ def fhost():
         if "file" in request.files:
             try:
                 # Store the file with the requested expiration date
-                return store_file(
+                sf = store_file(
                     request.files["file"],
                     int(request.form["expires"]),
                     request.remote_addr,
@@ -509,7 +527,7 @@ def fhost():
                 abort(400)
             except KeyError:
                 # No expiration date was requested, store with the max lifespan
-                return store_file(
+                sf = store_file(
                     request.files["file"],
                     None,
                     request.remote_addr,
@@ -517,14 +535,17 @@ def fhost():
                     secret
                 )
         elif "url" in request.form:
-            return store_url(
+            sf = store_url(
                 request.form["url"],
                 request.remote_addr,
                 request.user_agent.string,
                 secret
             )
         elif "shorten" in request.form:
-            return shorten(request.form["shorten"])
+            abort(403)
+
+        if sf is not None:
+            return Response(sf, mimetype="text/plain")
 
         abort(400)
     else:
