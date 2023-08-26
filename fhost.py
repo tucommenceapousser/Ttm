@@ -25,7 +25,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from sqlalchemy import and_, or_
 from jinja2.exceptions import *
-from jinja2 import ChoiceLoader, FileSystemLoader
+from jinja2 import ChoiceLoader, FileSystemLoader, Template
 from hashlib import sha256
 from magic import Magic
 from mimetypes import guess_extension
@@ -154,6 +154,19 @@ class File(db.Model):
         self.ua = ua
         self.expiration = expiration
         self.mgmt_token = mgmt_token
+
+    def __repr__(self):
+        # using jinja here to get the filesizeformat() filter
+        return Template((
+            "https://ttm.sh/{{ su.enbase(f.id) }}{{ f.ext }}\n"
+            "id: {{ f.id }}, name: {{ su.enbase(f.id) }}, ext: {{ f.ext }}, mime: {{ f.mime }}\n"
+            "addr: {{ f.addr }}, removed: {{ f.removed }}, nsfw_score: {{ f.nsfw_score }}\n"
+            "hash: {{ f.sha256 }}\n"
+            "size: {% if f.getpath().is_file() %}{{ f.getpath().stat().st_size | filesizeformat(True) }}{% else %}0{% endif %}\n"
+        )).render(f=self, su=su)
+
+    def getpath(self):
+        return Path(app.config["FHOST_STORAGE_PATH"]) / self.sha256
 
     @property
     def is_nsfw(self) -> bool:
